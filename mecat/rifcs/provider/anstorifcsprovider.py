@@ -5,6 +5,7 @@ import tardis.tardis_portal.publish.provider.schemarifcsprovider as schemarifcsp
     
 SERVER_URL = "https://tardis.nbi.ansto.gov.au"
 HARVEST_URL = "http://tardis.nbi.ansto.gov.au/oai/provider"
+MANAGED_BY_REF = "research-data.ansto.gov.au/collection/483"
 
 INSTRUMENT_SERVICE_IDS = {
     'Echidna' : '766',
@@ -39,6 +40,9 @@ class AnstoRifCsProvider(schemarifcsprovider.SchemaRifCsProvider):
         
     def get_originating_source(self):
         return HARVEST_URL
+    
+    def get_managed_by(self):
+        return MANAGED_BY_REF
         
     def get_key(self, experiment):
         return "research-data.ansto.gov.au/collection/bragg/%s" % (experiment.id)  
@@ -82,4 +86,5 @@ class AnstoRifCsProvider(schemarifcsprovider.SchemaRifCsProvider):
         c['anzsrcfor'].extend(['029904'])
         c['rights'] = self.get_rights(experiment)
         c['access_rights'] = self.get_access_rights(experiment)
+        c['managed_by'] = self.get_managed_by(experiment)
         return c
