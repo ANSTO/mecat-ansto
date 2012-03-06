@@ -86,5 +86,5 @@ class AnstoRifCsProvider(schemarifcsprovider.SchemaRifCsProvider):
         c['anzsrcfor'].extend(['029904'])
         c['rights'] = self.get_rights(experiment)
         c['access_rights'] = self.get_access_rights(experiment)
-        c['managed_by'] = self.get_managed_by(experiment)
+        c['managed_by'] = self.get_managed_by()
         return c
