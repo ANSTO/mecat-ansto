@@ -115,3 +115,7 @@ class AnstoRifCsProviderTestCase(TestCase):
         description = self.provider.get_description(self.e1)
         
         self.assertEquals(description, self.random_custom_description)
+    
+    def testManagedBy(self):
+        managed_by = self.provider.get_managed_by()
+        self.assertEquals(managed_by, anstorifcsprovider.MANAGED_BY_REF)
