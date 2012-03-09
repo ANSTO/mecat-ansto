@@ -41,7 +41,7 @@
             </relatedObject>
                    
             <relatedObject>
-                <key>{{located_in}}</key>
+                <key>{{managed_by}}</key>
                 <relation type="isManagedBy"/>
             </relatedObject>            
 {% for forcode in anzsrcfor %}            <subject type="anzsrc-for">{{forcode}}</subject>{% endfor %}
