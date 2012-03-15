@@ -30,7 +30,10 @@ class AnstoRifCsProvider(schemarifcsprovider.SchemaRifCsProvider):
             # We do not want the abstract to be available in the description when
             # no custom description is available
             desc = ""
-        return super(AnstoRifCsProvider, self).format_desc(desc)
+        try:
+            return super(AnstoRifCsProvider, self).format_desc(desc)
+        except:
+            return desc.strip()
     
     def get_emails(self, beamlines):
         emails = []
