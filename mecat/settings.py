@@ -167,6 +167,7 @@ else:
 
 INSTALLED_APPS = (
     'mecat',
+    'mecat.templatetags',
     'django_extensions',
     'django.contrib.auth',
     'django.contrib.contenttypes',
