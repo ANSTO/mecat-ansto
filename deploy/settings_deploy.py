@@ -29,11 +29,11 @@ DATABASES = {
 }
 if ORACLISE:
 	DATABASES['default']['ENGINE'] = 'django.db.backends.oracle'
-	DATABASES['default']['NAME'] = 'DBAP11'
-	DATABASES['default']['USER'] = 'MECAT_TST'
-	DATABASES['default']['PASSWORD'] = 'kf930fjs84fj'
-	DATABASES['default']['HOST'] = 'twilight.nbi.ansto.gov.au'
-	DATABASES['default']['PORT'] = '1521'
+	DATABASES['default']['NAME'] = ''
+	DATABASES['default']['USER'] = ''
+	DATABASES['default']['PASSWORD'] = ''
+	DATABASES['default']['HOST'] = ''
+	DATABASES['default']['PORT'] = ''
 	DATABASES['default']['OPTION'] = {'threaded': True}
 
 # A dictionary containing the settings for all caches to be used with
