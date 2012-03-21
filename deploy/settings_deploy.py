@@ -1,9 +1,10 @@
 ORACLISE = True
 from os import path
+import djcelery
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
-DEBUG = False
+DEBUG = True
 
 TEMPLATE_DEBUG = DEBUG
 
@@ -28,10 +29,10 @@ DATABASES = {
 }
 if ORACLISE:
 	DATABASES['default']['ENGINE'] = 'django.db.backends.oracle'
-	DATABASES['default']['NAME'] = ''
-	DATABASES['default']['USER'] = ''
-	DATABASES['default']['PASSWORD'] = ''
-	DATABASES['default']['HOST'] = ''
+	DATABASES['default']['NAME'] = 'DBAP11'
+	DATABASES['default']['USER'] = 'MECAT_TST'
+	DATABASES['default']['PASSWORD'] = 'kf930fjs84fj'
+	DATABASES['default']['HOST'] = 'twilight.nbi.ansto.gov.au'
 	DATABASES['default']['PORT'] = '1521'
 	DATABASES['default']['OPTION'] = {'threaded': True}
 
@@ -70,11 +71,26 @@ SITE_ID = 1
 
 USE_I18N = True
 
+STATIC_ROOT = path.abspath(path.join(path.dirname(__file__),'..','static'))
+
+STATIC_URL = '/static'
+
+def get_admin_media_path():
+    import pkgutil
+    package = pkgutil.get_loader("django.contrib.admin")
+    return path.join(package.filename, 'media')
+
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
 
-ADMIN_MEDIA_PREFIX = '/media/'
+ADMIN_MEDIA_STATIC_DOC_ROOT = get_admin_media_path()
+
+ADMIN_MEDIA_PREFIX = STATIC_URL + '/admin/'
+
+STATICFILES_DIRS = (
+    ('admin', ADMIN_MEDIA_STATIC_DOC_ROOT),
+)
 
 # Make this unique, and don't share it with anybody.
 
@@ -89,7 +105,7 @@ MIDDLEWARE_CLASSES = (
     #'django.middleware.cache.FetchFromCacheMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'tardis.tardis_portal.minidetector.Middleware',
+    #'tardis.tardis_portal.minidetector.Middleware',
     'tardis.tardis_portal.logging_middleware.LoggingMiddleware',
     'tardis.tardis_portal.auth.AuthorizationMiddleware',
                       #'ajaxerrors.middleware.ShowAJAXErrors',
@@ -98,19 +114,18 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'mecat.urls'
 
 TEMPLATE_CONTEXT_PROCESSORS = ('django.core.context_processors.request',
+                               'django.core.context_processors.static',
                                'django.contrib.auth.context_processors.auth',
                                'django.core.context_processors.debug',
-'tardis.tardis_poratl.context_processors.single_search_processor',
-                               'django.core.context_processors.i18n')
+                               'tardis.tardis_portal.context_processors.single_search_processor',
+                               'django.core.context_processors.i18n',
+                               'tardis.tardis_portal.context_processors.tokenuser_processor',)
 
-# Put strings here, like "/home/html/django_templates" or
-# "C:/www/django/templates". Always use forward slashes, even on Windows.
-# Don't forget to use absolute paths, not relative paths.
-TEMPLATE_DIRS = (
-    path.join(path.dirname(__file__),
-    'templates/').replace('\\', '/'),
+TEMPLATE_LOADERS = (
+    'tardis.template.loaders.app_specific.Loader',
+    'django.template.loaders.app_directories.Loader',
+    'django.template.loaders.filesystem.Loader',
 )
-#raise Exception(TEMPLATE_DIRS)
 
 # Temporarily disable transaction management until everyone agrees that
 # we should start handling transactions
@@ -141,7 +156,7 @@ ANSTO_MEDIA_ROOT = path.abspath(path.join(path.dirname(__file__),
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 
-MEDIA_URL = '/site_media/'
+MEDIA_URL = '/site_media'
 
 #set to empty tuple () for no apps
 #TARDIS_APPS = ('mrtardis', )
@@ -157,7 +172,8 @@ else:
 # this Django installation.
 
 INSTALLED_APPS = (
-    'haystack',
+    'mecat',
+    'mecat.templatetags',
     'django_extensions',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -165,12 +181,21 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    'django.contrib.staticfiles',
+    'tardis.template.loaders',
     'tardis.tardis_portal',
     'tardis.tardis_portal.templatetags',
     'registration',
-    'mecat',
+    'south',
+    'django_jasmine',
+    'djcelery',
+    'djkombu',
     ) + apps
 
+JASMINE_TEST_DIRECTORY = path.abspath(path.join(path.dirname(__file__),
+                                                'tardis_portal',
+                                                'tests',
+                                                'jasmine'))
 
 PUBLISH_PROVIDERS = (
                     'tardis.tardis_portal.publish.rif_cs_profile.'
@@ -259,15 +284,29 @@ REGISTRATION_OPEN = False
 #Are the datasets ingested via METS xml (web services) to be immutable?
 IMMUTABLE_METS_DATASETS = True
 
-SINGLE_SEARCH_ENABLED=False
-if not SINGLE_SEARCH_ENABLED:
-    HAYSTACK_ENABLE_REGISTRATIONS = False
+SINGLE_SEARCH_ENABLED=True
+
 # Settings for the single search box
 # Set HAYSTACK_SOLR_URL to the location of the SOLR server instance
 #SINGLE_SEARCH_ENABLED = True
 HAYSTACK_SITECONF = 'tardis.search_sites'
 HAYSTACK_SEARCH_ENGINE = 'solr'
 HAYSTACK_SOLR_URL = 'http://localhost:8080/solr'
+
+if SINGLE_SEARCH_ENABLED:
+    INSTALLED_APPS = INSTALLED_APPS + ('haystack',)
+else:
+    HAYSTACK_ENABLE_REGISTRATIONS = False
+
+DOI_ENABLE = False
+DOI_XML_PROVIDER = 'tardis.tardis_portal.ands_doi.DOIXMLProvider'
+#DOI_TEMPLATE_DIR = path.join(TARDIS_DIR, 'tardis_portal/templates/tardis_portal/doi/')
+DOI_TEMPLATE_DIR = path.join('tardis_portal/doi/')
+DOI_APP_ID = ''
+DOI_NAMESPACE = 'http://www.tardis.edu.au/schemas/doi/2011/12/07'
+DOI_MINT_URL = 'https://services.ands.org.au/home/dois/doi_mint.php'
+DOI_RELATED_INFO_ENABLE = False
+DOI_BASE_URL='http://mytardis.example.com'
 
 TOKEN_EXPIRY_DAYS=30
 TOKEN_USERNAME='tokenuser'
@@ -282,3 +321,7 @@ RIFCS_TEMPLATE_DIR = 'tardis_portal/rif-cs/profiles/'
 RELATED_INFO_SCHEMA_NAMESPACE = 'http://www.tardis.edu.au/schemas/related_info/2011/11/10'
 RIFCS_GROUP = "Australian Nuclear Science and Technology Organisation"
 RIFCS_MYTARDIS_KEY = "research-data.ansto.gov.au/collection/771"
+
+djcelery.setup_loader()
+
+
