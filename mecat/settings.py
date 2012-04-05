@@ -3,7 +3,7 @@ import djcelery
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
-DEBUG = True
+DEBUG = False
 
 TEMPLATE_DEBUG = DEBUG
 
