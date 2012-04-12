@@ -10,6 +10,8 @@ if [ ! -f $SCHEMA_FILE ]; then
 fi
 
 $DJANGO build_solr_schema 2>/dev/null > $TMP_SCHEMA_FILE
+date >> $LOG_FILE
+echo "Running index update script now.." >> $LOG_FILE
 diff -q $SCHEMA_FILE $TMP_SCHEMA_FILE >/dev/null 2>&1
 if [ $? -eq 1 ]; then
     date >> $LOG_FILE
